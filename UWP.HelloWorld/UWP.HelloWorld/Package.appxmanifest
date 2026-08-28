@@ -7,15 +7,15 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="0a370459-8f23-4d46-abc0-bc72e7df8b77"
-    Publisher="CN=peter"
+    Name="0a370459-8f23-4d46-abc0-bc72e7df8b76"
+    Publisher="CN=ChaconMoon"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="0a370459-8f23-4d46-abc0-bc72e7df8b77" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>UWP.HelloWorld</DisplayName>
-    <PublisherDisplayName>peter</PublisherDisplayName>
+    <DisplayName>Open Meteo Xbox</DisplayName>
+    <PublisherDisplayName>ChaconMoon</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -30,12 +30,12 @@
   <Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="UWP.HelloWorld.App">
+      EntryPoint="OpenMeteoXbox.App">
       <uap:VisualElements
-        DisplayName="UWP.HelloWorld"
+        DisplayName="Open Meteo Xbox"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
-        Description="UWP.HelloWorld"
+        Description="Open Meteo Xbox"
         BackgroundColor="transparent">
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />

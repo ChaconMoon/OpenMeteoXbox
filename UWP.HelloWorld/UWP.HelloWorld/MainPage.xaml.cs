@@ -24,14 +24,108 @@ namespace UWP.HelloWorld
         }
 
         /// <summary>
-        /// Manejador de evento al presionar una tecla en el cuadro de búsqueda.
+        /// Manejador global de teclas y botones del mando en la página.
+        /// </summary>
+        public void Page_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (keyboardOverlay.Visibility == Visibility.Visible)
+            {
+                if (e.Key == Windows.System.VirtualKey.GamepadB || e.Key == Windows.System.VirtualKey.Escape)
+                {
+                    btnCancelKeyboard_Click(this, null);
+                    e.Handled = true;
+                }
+                else if (e.Key == Windows.System.VirtualKey.GamepadX)
+                {
+                    // Atajo: [X] = Espacio
+                    txtKeyboardDisplay.Text += " ";
+                    e.Handled = true;
+                }
+                else if (e.Key == Windows.System.VirtualKey.GamepadY)
+                {
+                    // Atajo: [Y] = Borrar
+                    if (txtKeyboardDisplay.Text.Length > 0)
+                    {
+                        txtKeyboardDisplay.Text = txtKeyboardDisplay.Text.Substring(0, txtKeyboardDisplay.Text.Length - 1);
+                    }
+                    e.Handled = true;
+                }
+                else if (e.Key == Windows.System.VirtualKey.GamepadMenu)
+                {
+                    // Atajo: [Start] = Aceptar y buscar
+                    btnAcceptKeyboard_Click(this, null);
+                    e.Handled = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Manejador de eventos de teclado y mando en el cuadro de búsqueda.
         /// </summary>
         public void OnKeyboardInput(object sender, KeyRoutedEventArgs e)
         {
-            if (e.Key == Windows.System.VirtualKey.Enter)
+            if (e.Key == Windows.System.VirtualKey.Enter || e.Key == Windows.System.VirtualKey.GamepadMenu)
             {
                 btnSearch_Click(this, null);
             }
+            else if (e.Key == Windows.System.VirtualKey.GamepadA)
+            {
+                OpenVirtualKeyboard();
+            }
+        }
+
+        private void btnOpenKeyboard_Click(object sender, RoutedEventArgs e)
+        {
+            OpenVirtualKeyboard();
+        }
+
+        private void OpenVirtualKeyboard()
+        {
+            txtKeyboardDisplay.Text = txtCity.Text ?? string.Empty;
+            keyboardOverlay.Visibility = Visibility.Visible;
+            btnFirstKey.Focus(FocusState.Programmatic);
+
+            // Intentar también abrir el teclado táctil de Windows/Xbox si está disponible
+            Windows.UI.ViewManagement.InputPane.GetForCurrentView().TryShow();
+        }
+
+        private void KeyButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is string tag)
+            {
+                if (tag == "BACKSPACE")
+                {
+                    if (txtKeyboardDisplay.Text.Length > 0)
+                    {
+                        txtKeyboardDisplay.Text = txtKeyboardDisplay.Text.Substring(0, txtKeyboardDisplay.Text.Length - 1);
+                    }
+                }
+                else if (tag == "SPACE")
+                {
+                    txtKeyboardDisplay.Text += " ";
+                }
+                else if (tag == "CLEAR")
+                {
+                    txtKeyboardDisplay.Text = string.Empty;
+                }
+                else
+                {
+                    txtKeyboardDisplay.Text += tag;
+                }
+            }
+        }
+
+        private void btnAcceptKeyboard_Click(object sender, RoutedEventArgs e)
+        {
+            txtCity.Text = txtKeyboardDisplay.Text;
+            keyboardOverlay.Visibility = Visibility.Collapsed;
+            btnSearch_Click(this, null);
+        }
+
+        private void btnCancelKeyboard_Click(object sender, RoutedEventArgs e)
+        {
+            keyboardOverlay.Visibility = Visibility.Collapsed;
+            txtCity.Focus(FocusState.Programmatic);
         }
 
         /// <summary>
@@ -88,18 +182,18 @@ namespace UWP.HelloWorld
                 double windSpeed = current.GetNamedNumber("wind_speed_10m");
                 int weatherCode = (int)current.GetNamedNumber("weather_code");
 
-                var (emoji, description) = GetWeatherInfo(weatherCode);
+                WeatherDetails weather = GetWeatherInfo(weatherCode);
 
                 // 3. Actualizar la interfaz de usuario
                 txtLocation.Text = string.IsNullOrEmpty(country) ? cityName : $"{cityName}, {country}";
-                txtWeatherEmoji.Text = emoji;
-                txtWeatherDescription.Text = description;
+                txtWeatherEmoji.Text = weather.Emoji;
+                txtWeatherDescription.Text = weather.Description;
                 txtTemperature.Text = $"{temp:0.#} °C";
                 txtApparentTemp.Text = $"{apparentTemp:0.#} °C";
                 txtHumidity.Text = $"{humidity:0}%";
                 txtWindSpeed.Text = $"{windSpeed:0.#} km/h";
 
-                _speechText = $"En {cityName}, el clima actual es {description} con una temperatura de {temp:0.#} grados Celsius y una sensación térmica de {apparentTemp:0.#} grados.";
+                _speechText = $"En {cityName}, el clima actual es {weather.Description} con una temperatura de {temp:0.#} grados Celsius y una sensación térmica de {apparentTemp:0.#} grados.";
 
                 txtError.Visibility = Visibility.Collapsed;
                 weatherCard.Visibility = Visibility.Visible;
@@ -164,55 +258,70 @@ namespace UWP.HelloWorld
         /// <summary>
         /// Traduce el código de clima WMO de Open-Meteo a emoji y descripción en español.
         /// </summary>
-        private (string Emoji, string Description) GetWeatherInfo(int code)
+        private WeatherDetails GetWeatherInfo(int code)
         {
             switch (code)
             {
                 case 0:
-                    return ("☀️", "Cielo despejado");
+                    return new WeatherDetails("☀️", "Cielo despejado");
                 case 1:
-                    return ("🌤️", "Mayormente despejado");
+                    return new WeatherDetails("🌤️", "Mayormente despejado");
                 case 2:
-                    return ("⛅", "Parcialmente nublado");
+                    return new WeatherDetails("⛅", "Parcialmente nublado");
                 case 3:
-                    return ("☁️", "Nublado");
+                    return new WeatherDetails("☁️", "Nublado");
                 case 45:
                 case 48:
-                    return ("🌫️", "Niebla");
+                    return new WeatherDetails("🌫️", "Niebla");
                 case 51:
                 case 53:
                 case 55:
-                    return ("🌦️", "Llovizna");
+                    return new WeatherDetails("🌦️", "Llovizna");
                 case 56:
                 case 57:
-                    return ("🌨️", "Llovizna helada");
+                    return new WeatherDetails("🌨️", "Llovizna helada");
                 case 61:
                 case 63:
                 case 65:
-                    return ("🌧️", "Lluvia");
+                    return new WeatherDetails("🌧️", "Lluvia");
                 case 66:
                 case 67:
-                    return ("🌨️", "Lluvia helada");
+                    return new WeatherDetails("🌨️", "Lluvia helada");
                 case 71:
                 case 73:
                 case 75:
                 case 77:
-                    return ("❄️", "Nevada");
+                    return new WeatherDetails("❄️", "Nevada");
                 case 80:
                 case 81:
                 case 82:
-                    return ("🌧️", "Chubascos de lluvia");
+                    return new WeatherDetails("🌧️", "Chubascos de lluvia");
                 case 85:
                 case 86:
-                    return ("🌨️", "Chubascos de nieve");
+                    return new WeatherDetails("🌨️", "Chubascos de nieve");
                 case 95:
-                    return ("⛈️", "Tormenta eléctrica");
+                    return new WeatherDetails("⛈️", "Tormenta eléctrica");
                 case 96:
                 case 99:
-                    return ("⛈️", "Tormenta eléctrica con granizo");
+                    return new WeatherDetails("⛈️", "Tormenta eléctrica con granizo");
                 default:
-                    return ("🌡️", "Condición variable");
+                    return new WeatherDetails("🌡️", "Condición variable");
             }
+        }
+    }
+
+    /// <summary>
+    /// Modelo auxiliar para la información del estado del tiempo.
+    /// </summary>
+    public class WeatherDetails
+    {
+        public string Emoji { get; }
+        public string Description { get; }
+
+        public WeatherDetails(string emoji, string description)
+        {
+            Emoji = emoji;
+            Description = description;
         }
     }
 }

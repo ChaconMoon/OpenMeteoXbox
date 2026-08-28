@@ -1,4 +1,4 @@
-# UWP.Clima (Weather App)
+# Open Meteo Xbox
 
 Aplicación ligera para la Plataforma Universal de Windows (UWP) que consulta el pronóstico meteorológico en tiempo real para cualquier ciudad del mundo utilizando la API pública de [Open-Meteo](https://open-meteo.com/).
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,6 +30,8 @@ namespace UWP.HelloWorld
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            // Permite navegación nativa con cruceta/joystick de mando (Gamepad XY navigation)
+            this.RequiresPointerMode = ApplicationRequiresPointerMode.WhenRequested;
         }
 
         /// <summary>

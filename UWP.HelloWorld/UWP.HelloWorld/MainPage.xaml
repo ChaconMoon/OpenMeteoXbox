@@ -5,14 +5,15 @@
     xmlns:local="using:UWP.HelloWorld"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    KeyDown="Page_KeyDown">
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="24">
-            <StackPanel HorizontalAlignment="Center" MaxWidth="480">
+            <StackPanel HorizontalAlignment="Center" MaxWidth="500">
                 
                 <!-- Encabezado -->
-                <TextBlock Text="🌤️ App del Clima" 
+                <TextBlock Text="🌤️ Open Meteo Xbox" 
                            FontSize="28" 
                            FontWeight="Bold" 
                            HorizontalAlignment="Center" 
@@ -29,6 +30,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     
                     <TextBox x:Name="txtCity" 
@@ -38,8 +40,17 @@
                              VerticalAlignment="Center"
                              Margin="0,0,8,0"/>
                     
+                    <Button x:Name="btnOpenKeyboard"
+                            Grid.Column="1"
+                            Content="⌨️"
+                            ToolTipService.ToolTip="Abrir teclado en pantalla"
+                            Click="btnOpenKeyboard_Click"
+                            FontSize="16"
+                            Padding="12,8"
+                            Margin="0,0,8,0"/>
+
                     <Button x:Name="btnSearch" 
-                            Grid.Column="1" 
+                            Grid.Column="2" 
                             Content="🔍 Buscar" 
                             Click="btnSearch_Click" 
                             FontSize="16"
@@ -128,6 +139,92 @@
                 </Border>
 
             </StackPanel>
+
+            <!-- Overlay del Teclado Virtual Integrado para Mando -->
+            <Grid x:Name="keyboardOverlay" 
+                  Visibility="Collapsed" 
+                  Background="#E6101010" 
+                  HorizontalAlignment="Stretch" 
+                  VerticalAlignment="Stretch"
+                  Margin="-24"
+                  Padding="24">
+                <Border Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" 
+                        BorderBrush="{ThemeResource SystemControlForegroundBaseMediumBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="12" 
+                        Padding="20" 
+                        MaxWidth="620" 
+                        VerticalAlignment="Center" 
+                        HorizontalAlignment="Center">
+                    <StackPanel>
+                        <TextBlock Text="⌨️ Teclado en Pantalla" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+
+                        <!-- Cuadro de visualización del texto escrito -->
+                        <TextBox x:Name="txtKeyboardDisplay" 
+                                 FontSize="18" 
+                                 Margin="0,0,0,12" 
+                                 IsReadOnly="True" 
+                                 PlaceholderText="Texto introducido..."/>
+
+                        <!-- Atajos con el mando -->
+                        <TextBlock Text="🎮 [A] Pulsar tecla  •  [X] Espacio  •  [Y] Borrar  •  [B] Cancelar  •  [Start] Buscar" 
+                                   FontSize="12" 
+                                   Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}" 
+                                   HorizontalAlignment="Center" 
+                                   Margin="0,0,0,16"/>
+
+                        <!-- Fila 1 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                            <Button Content="Q" Tag="Q" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16" x:Name="btnFirstKey"/>
+                            <Button Content="W" Tag="W" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="E" Tag="E" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="R" Tag="R" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="T" Tag="T" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="Y" Tag="Y" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="U" Tag="U" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="I" Tag="I" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="O" Tag="O" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="P" Tag="P" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                        </StackPanel>
+
+                        <!-- Fila 2 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                            <Button Content="A" Tag="A" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="S" Tag="S" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="D" Tag="D" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="F" Tag="F" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="G" Tag="G" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="H" Tag="H" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="J" Tag="J" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="K" Tag="K" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="L" Tag="L" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="Ñ" Tag="Ñ" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                        </StackPanel>
+
+                        <!-- Fila 3 -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
+                            <Button Content="Z" Tag="Z" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="X" Tag="X" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="C" Tag="C" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="V" Tag="V" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="B" Tag="B" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="N" Tag="N" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="M" Tag="M" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="-" Tag="-" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="." Tag="." Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                            <Button Content="⌫" Tag="BACKSPACE" Click="KeyButton_Click" Width="48" Height="44" Margin="3" FontSize="16"/>
+                        </StackPanel>
+
+                        <!-- Fila 4: Acciones -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                            <Button Content="Espacio" Tag="SPACE" Click="KeyButton_Click" Width="140" Height="44" Margin="4" FontSize="14"/>
+                            <Button Content="Limpiar" Tag="CLEAR" Click="KeyButton_Click" Width="100" Height="44" Margin="4" FontSize="14"/>
+                            <Button Content="❌ Cancelar" Click="btnCancelKeyboard_Click" Width="110" Height="44" Margin="4" FontSize="14"/>
+                            <Button Content="🔍 Buscar" Click="btnAcceptKeyboard_Click" Width="120" Height="44" Margin="4" FontSize="14" Style="{ThemeResource AccentButtonStyle}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
         </Grid>
     </ScrollViewer>
 </Page>
