@@ -9,7 +9,7 @@
   <Identity
     Name="0a370459-8f23-4d46-abc0-bc72e7df8b76"
     Publisher="CN=ChaconMoon"
-    Version="1.0.0.0" />
+    Version="1.0.2.0" />
 
   <mp:PhoneIdentity PhoneProductId="0a370459-8f23-4d46-abc0-bc72e7df8b77" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
