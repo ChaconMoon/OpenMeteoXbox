@@ -1,61 +1,218 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using System;
+using System.Globalization;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Windows.Data.Json;
+using Windows.Media.SpeechSynthesis;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
-
-// Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x407 dokumentiert.
 
 namespace UWP.HelloWorld
 {
-  /// <summary>
-  /// Eine leere Seite, die eigenständig verwendet oder zu der innerhalb eines Rahmens navigiert werden kann.
-  /// </summary>
-  public sealed partial class MainPage : Page
-  {
-    public MainPage()
-    {
-      this.InitializeComponent();
-    }
-
     /// <summary>
-    /// Welcomes the User with a short text and SpeechSynthesis.
-    /// There is actually no MVVM implentend in this rudimental App.
+    /// Página principal de la aplicación del clima.
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private async void button_Click(object sender, RoutedEventArgs e)
+    public sealed partial class MainPage : Page
     {
-      if (txtbox.Text != "")
-        txtblock.Text = "Hallo " + txtbox.Text + "!";
-      else
-        txtblock.Text = "Du hast keinen Namen angegeben.";
+        private readonly HttpClient _httpClient = new HttpClient();
+        private string _speechText = string.Empty;
 
-      MediaElement mediaElement = new MediaElement();
-      var synth = new Windows.Media.SpeechSynthesis.SpeechSynthesizer();
-      Windows.Media.SpeechSynthesis.SpeechSynthesisStream stream = await synth.SynthesizeTextToStreamAsync(txtblock.Text);
-      mediaElement.SetSource(stream, stream.ContentType);
-      mediaElement.Play();
-    }
+        public MainPage()
+        {
+            this.InitializeComponent();
+        }
 
-    /// <summary>
-    /// Possibility to activate the Button by pressing the enter
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    public void OnKeyboardInput(object sender, KeyRoutedEventArgs e)
-    {
-      if (e.Key == Windows.System.VirtualKey.Enter)
-        button_Click(this, null);
+        /// <summary>
+        /// Manejador de evento al presionar una tecla en el cuadro de búsqueda.
+        /// </summary>
+        public void OnKeyboardInput(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Enter)
+            {
+                btnSearch_Click(this, null);
+            }
+        }
+
+        /// <summary>
+        /// Manejador del botón de búsqueda de clima.
+        /// </summary>
+        private async void btnSearch_Click(object sender, RoutedEventArgs e)
+        {
+            string city = txtCity.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(city))
+            {
+                ShowError("Por favor, introduce el nombre de una ciudad.");
+                return;
+            }
+
+            SetLoading(true);
+
+            try
+            {
+                // 1. Obtener coordenadas geográficas de la ciudad
+                string geoUrl = $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(city)}&count=1&language=es&format=json";
+                string geoResponse = await _httpClient.GetStringAsync(new Uri(geoUrl));
+
+                if (!JsonObject.TryParse(geoResponse, out JsonObject geoJson) ||
+                    !geoJson.ContainsKey("results") ||
+                    geoJson.GetNamedArray("results").Count == 0)
+                {
+                    ShowError($"No se encontraron resultados para '{city}'.");
+                    return;
+                }
+
+                JsonObject locationObj = geoJson.GetNamedArray("results").GetObjectAt(0);
+                string cityName = locationObj.GetNamedString("name");
+                string country = locationObj.ContainsKey("country") ? locationObj.GetNamedString("country") : string.Empty;
+                double latitude = locationObj.GetNamedNumber("latitude");
+                double longitude = locationObj.GetNamedNumber("longitude");
+
+                // 2. Obtener pronóstico meteorológico actual
+                string latStr = latitude.ToString(CultureInfo.InvariantCulture);
+                string lonStr = longitude.ToString(CultureInfo.InvariantCulture);
+                string weatherUrl = $"https://api.open-meteo.com/v1/forecast?latitude={latStr}&longitude={lonStr}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m";
+
+                string weatherResponse = await _httpClient.GetStringAsync(new Uri(weatherUrl));
+                if (!JsonObject.TryParse(weatherResponse, out JsonObject weatherJson) ||
+                    !weatherJson.ContainsKey("current"))
+                {
+                    ShowError("Error al obtener los datos del clima.");
+                    return;
+                }
+
+                JsonObject current = weatherJson.GetNamedObject("current");
+                double temp = current.GetNamedNumber("temperature_2m");
+                double apparentTemp = current.GetNamedNumber("apparent_temperature");
+                double humidity = current.GetNamedNumber("relative_humidity_2m");
+                double windSpeed = current.GetNamedNumber("wind_speed_10m");
+                int weatherCode = (int)current.GetNamedNumber("weather_code");
+
+                var (emoji, description) = GetWeatherInfo(weatherCode);
+
+                // 3. Actualizar la interfaz de usuario
+                txtLocation.Text = string.IsNullOrEmpty(country) ? cityName : $"{cityName}, {country}";
+                txtWeatherEmoji.Text = emoji;
+                txtWeatherDescription.Text = description;
+                txtTemperature.Text = $"{temp:0.#} °C";
+                txtApparentTemp.Text = $"{apparentTemp:0.#} °C";
+                txtHumidity.Text = $"{humidity:0}%";
+                txtWindSpeed.Text = $"{windSpeed:0.#} km/h";
+
+                _speechText = $"En {cityName}, el clima actual es {description} con una temperatura de {temp:0.#} grados Celsius y una sensación térmica de {apparentTemp:0.#} grados.";
+
+                txtError.Visibility = Visibility.Collapsed;
+                weatherCard.Visibility = Visibility.Visible;
+            }
+            catch (HttpRequestException)
+            {
+                ShowError("Error de conexión. Comprueba tu conexión a internet.");
+            }
+            catch (Exception ex)
+            {
+                ShowError($"Ocurrió un error: {ex.Message}");
+            }
+            finally
+            {
+                SetLoading(false);
+            }
+        }
+
+        /// <summary>
+        /// Síntesis de voz para leer el pronóstico actual en voz alta.
+        /// </summary>
+        private async void btnSpeak_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(_speechText)) return;
+
+            try
+            {
+                MediaElement mediaElement = new MediaElement();
+                using (var synth = new SpeechSynthesizer())
+                {
+                    SpeechSynthesisStream stream = await synth.SynthesizeTextToStreamAsync(_speechText);
+                    mediaElement.SetSource(stream, stream.ContentType);
+                    mediaElement.Play();
+                }
+            }
+            catch
+            {
+                // Si falla el sintetizador de voz en la plataforma, no interrumpir la experiencia de usuario
+            }
+        }
+
+        private void SetLoading(bool isLoading)
+        {
+            progressRing.IsActive = isLoading;
+            progressRing.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed;
+            btnSearch.IsEnabled = !isLoading;
+            txtCity.IsEnabled = !isLoading;
+
+            if (isLoading)
+            {
+                txtError.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void ShowError(string message)
+        {
+            txtError.Text = message;
+            txtError.Visibility = Visibility.Visible;
+            weatherCard.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// Traduce el código de clima WMO de Open-Meteo a emoji y descripción en español.
+        /// </summary>
+        private (string Emoji, string Description) GetWeatherInfo(int code)
+        {
+            switch (code)
+            {
+                case 0:
+                    return ("☀️", "Cielo despejado");
+                case 1:
+                    return ("🌤️", "Mayormente despejado");
+                case 2:
+                    return ("⛅", "Parcialmente nublado");
+                case 3:
+                    return ("☁️", "Nublado");
+                case 45:
+                case 48:
+                    return ("🌫️", "Niebla");
+                case 51:
+                case 53:
+                case 55:
+                    return ("🌦️", "Llovizna");
+                case 56:
+                case 57:
+                    return ("🌨️", "Llovizna helada");
+                case 61:
+                case 63:
+                case 65:
+                    return ("🌧️", "Lluvia");
+                case 66:
+                case 67:
+                    return ("🌨️", "Lluvia helada");
+                case 71:
+                case 73:
+                case 75:
+                case 77:
+                    return ("❄️", "Nevada");
+                case 80:
+                case 81:
+                case 82:
+                    return ("🌧️", "Chubascos de lluvia");
+                case 85:
+                case 86:
+                    return ("🌨️", "Chubascos de nieve");
+                case 95:
+                    return ("⛈️", "Tormenta eléctrica");
+                case 96:
+                case 99:
+                    return ("⛈️", "Tormenta eléctrica con granizo");
+                default:
+                    return ("🌡️", "Condición variable");
+            }
+        }
     }
-  }
 }

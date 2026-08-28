@@ -7,23 +7,127 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Padding="24">
+            <StackPanel HorizontalAlignment="Center" MaxWidth="480">
+                
+                <!-- Encabezado -->
+                <TextBlock Text="🌤️ App del Clima" 
+                           FontSize="28" 
+                           FontWeight="Bold" 
+                           HorizontalAlignment="Center" 
+                           Margin="0,20,0,8"/>
 
-    <StackPanel HorizontalAlignment = "Center">
-      <TextBlock Text = "Hallo Welt!"  Margin = "20"  Width = "200" 
-            HorizontalAlignment = "Left"/>
+                <TextBlock Text="Consulta el pronóstico meteorológico en tiempo real" 
+                           FontSize="14" 
+                           Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}" 
+                           HorizontalAlignment="Center" 
+                           Margin="0,0,0,24"/>
 
-      <TextBlock Text = "Schreib deinen Namen:" Margin = "20" Width = "200" 
-            HorizontalAlignment = "Left"/>
+                <!-- Barra de búsqueda -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBox x:Name="txtCity" 
+                             PlaceholderText="Escribe una ciudad (ej. Madrid, Bogotá...)" 
+                             KeyDown="OnKeyboardInput" 
+                             FontSize="16"
+                             VerticalAlignment="Center"
+                             Margin="0,0,8,0"/>
+                    
+                    <Button x:Name="btnSearch" 
+                            Grid.Column="1" 
+                            Content="🔍 Buscar" 
+                            Click="btnSearch_Click" 
+                            FontSize="16"
+                            Padding="16,8"/>
+                </Grid>
 
-      <TextBox x:Name = "txtbox"  Width = "280" Margin = "20" 
-            HorizontalAlignment = "Left" KeyDown="OnKeyboardInput"/>
+                <!-- Indicador de carga -->
+                <ProgressRing x:Name="progressRing" 
+                              IsActive="False" 
+                              Visibility="Collapsed" 
+                              Width="45" 
+                              Height="45" 
+                              Margin="0,20,0,20" 
+                              HorizontalAlignment="Center"/>
 
-      <Button x:Name = "button" Content = "Hier klicken" Margin = "20" 
-            Click = "button_Click"/>
+                <!-- Mensaje de Error -->
+                <TextBlock x:Name="txtError" 
+                           Foreground="Red" 
+                           FontSize="14" 
+                           TextWrapping="Wrap" 
+                           HorizontalAlignment="Center" 
+                           Margin="0,8,0,8" 
+                           Visibility="Collapsed"/>
 
-      <TextBlock x:Name = "txtblock" HorizontalAlignment = "Left" 
-            Margin = "20"/>
-    </StackPanel>
-  </Grid>
+                <!-- Tarjeta de Resultados del Clima -->
+                <Border x:Name="weatherCard" 
+                        Background="{ThemeResource SystemControlBackgroundAltHighBrush}" 
+                        BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="12" 
+                        Padding="20" 
+                        Margin="0,12,0,20"
+                        Visibility="Collapsed">
+                    <StackPanel>
+                        <!-- Ubicación -->
+                        <TextBlock x:Name="txtLocation" 
+                                   FontSize="22" 
+                                   FontWeight="SemiBold" 
+                                   HorizontalAlignment="Center"
+                                   Margin="0,0,0,8"/>
+
+                        <!-- Icono y Condición -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                            <TextBlock x:Name="txtWeatherEmoji" FontSize="36" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock x:Name="txtWeatherDescription" FontSize="18" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <!-- Temperatura Principal -->
+                        <TextBlock x:Name="txtTemperature" 
+                                   FontSize="48" 
+                                   FontWeight="Bold" 
+                                   HorizontalAlignment="Center" 
+                                   Margin="0,4,0,16"/>
+
+                        <!-- Detalles Adicionales -->
+                        <Grid Margin="0,8,0,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                <TextBlock Text="Sensación" FontSize="12" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock x:Name="txtApparentTemp" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                <TextBlock Text="Humedad" FontSize="12" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock x:Name="txtHumidity" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                <TextBlock Text="Viento" FontSize="12" Foreground="{ThemeResource SystemControlPageTextBaseMediumBrush}" HorizontalAlignment="Center"/>
+                                <TextBlock x:Name="txtWindSpeed" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Botón de Síntesis de Voz -->
+                        <Button x:Name="btnSpeak" 
+                                Content="🔊 Escuchar pronóstico" 
+                                Click="btnSpeak_Click" 
+                                HorizontalAlignment="Center" 
+                                Margin="0,8,0,0"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </Page>
