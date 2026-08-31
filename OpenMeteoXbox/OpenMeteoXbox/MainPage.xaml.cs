@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using System.Net.Http;
-using System.Threading.Tasks;
 using Windows.Data.Json;
 using Windows.Media.SpeechSynthesis;
 using Windows.UI.Xaml;
@@ -24,42 +23,6 @@ namespace OpenMeteoXbox
         }
 
         /// <summary>
-        /// Manejador global de teclas y botones del mando en la página.
-        /// </summary>
-        public void Page_KeyDown(object sender, KeyRoutedEventArgs e)
-        {
-            if (keyboardOverlay.Visibility == Visibility.Visible)
-            {
-                if (e.Key == Windows.System.VirtualKey.GamepadB || e.Key == Windows.System.VirtualKey.Escape)
-                {
-                    btnCancelKeyboard_Click(this, null);
-                    e.Handled = true;
-                }
-                else if (e.Key == Windows.System.VirtualKey.GamepadX)
-                {
-                    // Atajo: [X] = Espacio
-                    txtKeyboardDisplay.Text += " ";
-                    e.Handled = true;
-                }
-                else if (e.Key == Windows.System.VirtualKey.GamepadY)
-                {
-                    // Atajo: [Y] = Borrar
-                    if (txtKeyboardDisplay.Text.Length > 0)
-                    {
-                        txtKeyboardDisplay.Text = txtKeyboardDisplay.Text.Substring(0, txtKeyboardDisplay.Text.Length - 1);
-                    }
-                    e.Handled = true;
-                }
-                else if (e.Key == Windows.System.VirtualKey.GamepadMenu)
-                {
-                    // Atajo: [Start] = Aceptar y buscar
-                    btnAcceptKeyboard_Click(this, null);
-                    e.Handled = true;
-                }
-            }
-        }
-
-        /// <summary>
         /// Manejador de eventos de teclado y mando en el cuadro de búsqueda.
         /// </summary>
         public void OnKeyboardInput(object sender, KeyRoutedEventArgs e)
@@ -68,64 +31,6 @@ namespace OpenMeteoXbox
             {
                 btnSearch_Click(this, null);
             }
-            else if (e.Key == Windows.System.VirtualKey.GamepadA)
-            {
-                OpenVirtualKeyboard();
-            }
-        }
-
-        public void btnOpenKeyboard_Click(object sender, RoutedEventArgs e)
-        {
-            OpenVirtualKeyboard();
-        }
-
-        private void OpenVirtualKeyboard()
-        {
-            txtKeyboardDisplay.Text = txtCity.Text ?? string.Empty;
-            keyboardOverlay.Visibility = Visibility.Visible;
-            btnFirstKey.Focus(FocusState.Programmatic);
-
-            // Intentar también abrir el teclado táctil de Windows/Xbox si está disponible
-            Windows.UI.ViewManagement.InputPane.GetForCurrentView().TryShow();
-        }
-
-        public void KeyButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.Tag is string tag)
-            {
-                if (tag == "BACKSPACE")
-                {
-                    if (txtKeyboardDisplay.Text.Length > 0)
-                    {
-                        txtKeyboardDisplay.Text = txtKeyboardDisplay.Text.Substring(0, txtKeyboardDisplay.Text.Length - 1);
-                    }
-                }
-                else if (tag == "SPACE")
-                {
-                    txtKeyboardDisplay.Text += " ";
-                }
-                else if (tag == "CLEAR")
-                {
-                    txtKeyboardDisplay.Text = string.Empty;
-                }
-                else
-                {
-                    txtKeyboardDisplay.Text += tag;
-                }
-            }
-        }
-
-        public void btnAcceptKeyboard_Click(object sender, RoutedEventArgs e)
-        {
-            txtCity.Text = txtKeyboardDisplay.Text;
-            keyboardOverlay.Visibility = Visibility.Collapsed;
-            btnSearch_Click(this, null);
-        }
-
-        public void btnCancelKeyboard_Click(object sender, RoutedEventArgs e)
-        {
-            keyboardOverlay.Visibility = Visibility.Collapsed;
-            txtCity.Focus(FocusState.Programmatic);
         }
 
         /// <summary>
