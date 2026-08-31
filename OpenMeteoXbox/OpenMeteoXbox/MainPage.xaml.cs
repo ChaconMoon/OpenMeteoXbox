@@ -308,6 +308,8 @@ namespace OpenMeteoXbox
                     return new WeatherDetails("🌡️", "Condición variable");
             }
         }
+
+
     }
 
     /// <summary>
