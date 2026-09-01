@@ -74,7 +74,7 @@ namespace OpenMeteoXbox
             }
         }
 
-        public void btnOpenKeyboard_Click(object sender, RoutedEventArgs e)
+        private void btnOpenKeyboard_Click(object sender, RoutedEventArgs e)
         {
             OpenVirtualKeyboard();
         }
@@ -89,7 +89,7 @@ namespace OpenMeteoXbox
             Windows.UI.ViewManagement.InputPane.GetForCurrentView().TryShow();
         }
 
-        public void KeyButton_Click(object sender, RoutedEventArgs e)
+        private void KeyButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.Tag is string tag)
             {
@@ -115,14 +115,14 @@ namespace OpenMeteoXbox
             }
         }
 
-        public void btnAcceptKeyboard_Click(object sender, RoutedEventArgs e)
+        private void btnAcceptKeyboard_Click(object sender, RoutedEventArgs e)
         {
             txtCity.Text = txtKeyboardDisplay.Text;
             keyboardOverlay.Visibility = Visibility.Collapsed;
             btnSearch_Click(this, null);
         }
 
-        public void btnCancelKeyboard_Click(object sender, RoutedEventArgs e)
+        private void btnCancelKeyboard_Click(object sender, RoutedEventArgs e)
         {
             keyboardOverlay.Visibility = Visibility.Collapsed;
             txtCity.Focus(FocusState.Programmatic);
@@ -131,7 +131,7 @@ namespace OpenMeteoXbox
         /// <summary>
         /// Manejador del botón de búsqueda de clima.
         /// </summary>
-        public async void btnSearch_Click(object sender, RoutedEventArgs e)
+        private async void btnSearch_Click(object sender, RoutedEventArgs e)
         {
             string city = txtCity.Text?.Trim();
             if (string.IsNullOrWhiteSpace(city))
@@ -215,7 +215,7 @@ namespace OpenMeteoXbox
         /// <summary>
         /// Síntesis de voz para leer el pronóstico actual en voz alta.
         /// </summary>
-        public async void btnSpeak_Click(object sender, RoutedEventArgs e)
+        private async void btnSpeak_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(_speechText)) return;
 
