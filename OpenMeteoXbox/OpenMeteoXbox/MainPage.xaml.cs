@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using System.Net.Http;
-using System.Threading.Tasks;
 using Windows.Data.Json;
 using Windows.Media.SpeechSynthesis;
 using Windows.UI.Xaml;
@@ -21,42 +20,6 @@ namespace OpenMeteoXbox
         public MainPage()
         {
             this.InitializeComponent();
-        }
-
-        /// <summary>
-        /// Manejador global de teclas y botones del mando en la página.
-        /// </summary>
-        public void Page_KeyDown(object sender, KeyRoutedEventArgs e)
-        {
-            if (keyboardOverlay.Visibility == Visibility.Visible)
-            {
-                if (e.Key == Windows.System.VirtualKey.GamepadB || e.Key == Windows.System.VirtualKey.Escape)
-                {
-                    btnCancelKeyboard_Click(this, null);
-                    e.Handled = true;
-                }
-                else if (e.Key == Windows.System.VirtualKey.GamepadX)
-                {
-                    // Atajo: [X] = Espacio
-                    txtKeyboardDisplay.Text += " ";
-                    e.Handled = true;
-                }
-                else if (e.Key == Windows.System.VirtualKey.GamepadY)
-                {
-                    // Atajo: [Y] = Borrar
-                    if (txtKeyboardDisplay.Text.Length > 0)
-                    {
-                        txtKeyboardDisplay.Text = txtKeyboardDisplay.Text.Substring(0, txtKeyboardDisplay.Text.Length - 1);
-                    }
-                    e.Handled = true;
-                }
-                else if (e.Key == Windows.System.VirtualKey.GamepadMenu)
-                {
-                    // Atajo: [Start] = Aceptar y buscar
-                    btnAcceptKeyboard_Click(this, null);
-                    e.Handled = true;
-                }
-            }
         }
 
         /// <summary>
@@ -308,6 +271,8 @@ namespace OpenMeteoXbox
                     return new WeatherDetails("🌡️", "Condición variable");
             }
         }
+
+
     }
 
     /// <summary>
